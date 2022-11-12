@@ -53,7 +53,7 @@ if (process.env.NODE_ENV === 'Development') {
 //Database connection --
 var mongoose = require('mongoose')
 mongoose.Promise = bluebird;
-let url = process.env.MONGODB_URI
+let url = `mongodb+srv://user1:mongo.100@cluster0.ypyw5.mongodb.net/prueba?retryWrites=true&w=majority`
 console.log("BD",url);
 let opts = {
   useNewUrlParser : true, 
@@ -75,7 +75,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:4000");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   next();
