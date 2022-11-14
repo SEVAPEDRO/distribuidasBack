@@ -36,6 +36,29 @@ exports.loginUser = async function (user) {
 
 }
 
+exports.loginGoogle = async function (user) {
+    // Creating a new Mongoose Object by using the new keyword
+    try {
+        // Find the User 
+        console.log("login:",user)
+        var _details = await User.findOne({
+            email: user.email
+        });
+        if (!_details) return 409
+
+        var token = jwt.sign({
+            id: _details._id
+        }, process.env.SECRET, {
+            expiresIn: 86400 // expires in 24 hours
+        });
+        return {token:token, user:_details};
+    } catch (e) {
+        // return a Error message describing the reason     
+        throw Error(e.message)
+    }
+
+}
+
 exports.createUser = async function (user) {
     // Creating a new Mongoose Object by using the new keyword
     var hashedPassword = bcrypt.hashSync(user.password, 8);

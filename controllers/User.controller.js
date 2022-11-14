@@ -34,7 +34,7 @@ exports.loginUser = async function (req, res, next) {
 exports.createUser = async function (req, res, next) {
     // Req.Body contains the form submit values.
     console.log("llegue al controller",req.body)
-    var owner = Boolean(req.body.owner)
+    var owner = req.body.owner ? Boolean(req.body.owner): false
     var User = {
         name: req.body.name,
         lastName: req.body.lastName,
@@ -44,11 +44,21 @@ exports.createUser = async function (req, res, next) {
     }
     try {
         // Calling the Service function with the new object from the Request Body
-        var createdUser = await UserService.createUser(User)
-        if(createdUser){
-            return res.status(201).json({createdUser, message: "Succesfully Created User"})
+        if(owner){
+            var createdUser = await UserService.createUser(User)
+            if(createdUser){
+                return res.status(201).json({createdUser, message: "Succesfully Created User"})
+            }else{
+                return res.status(409).json({message: "User has already been created"})
+            }
         }else{
-            return res.status(409).json({message: "User has already been created"})
+            var createdUser = await UserService.createUser(User)
+            if(createdUser){
+                return res.status(201).json({createdUser, message: "Succesfully Created User"})
+            }else{
+                var googleLogin = await UserService.loginGoogle(User)
+                return res.status(200).json({googleLogin, message: "Succesfully logged User"})
+            }
         }
     } catch (e) {
         //Return an Error Response Message with Code and the Error Message.
