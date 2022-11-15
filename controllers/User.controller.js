@@ -37,7 +37,7 @@ exports.createUser = async function (req, res, next) {
     var owner = req.body.owner ? Boolean(req.body.owner): false
     var User = {
         name: req.body.name,
-        lastName: req.body.lastName,
+        lastName: req.body.lastName ? req.body.lastName : " ",
         email: req.body.email,
         password: req.body.password,
         owner: owner 
@@ -56,8 +56,8 @@ exports.createUser = async function (req, res, next) {
             if(createdUser){
                 return res.status(201).json({createdUser, message: "Succesfully Created User"})
             }else{
-                var googleLogin = await UserService.loginGoogle(User)
-                return res.status(200).json({googleLogin, message: "Succesfully logged User"})
+                createdUser = await UserService.loginGoogle(User)
+                return res.status(200).json({createdUser, message: "Succesfully logged User"})
             }
         }
     } catch (e) {
