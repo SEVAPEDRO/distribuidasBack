@@ -131,7 +131,6 @@ exports.getNearByRestaurants = async function (query,options){
                 parseFloat(restaurants[i].location.latitude),
                 parseFloat(restaurants[i].location.longitude)
             )
-            // restaurantsDistance.push({distance: distance,id:restaurants[i]._id})
             restaurantsDistance.push({distance: distance,restaurant:restaurants[i]})
         }
         restaurantsDistance.sort((a,b) => (a.distance > b.distance) ? 1 : ((b.distance > a.distance) ? -1 : 0))
@@ -139,7 +138,7 @@ exports.getNearByRestaurants = async function (query,options){
         for(let i = 0; i<restaurantsDistance.length;i++){
             restos.push(restaurantsDistance[i].restaurant)
         }
-        return restos;
+        return restos.slice(options.offset,options.limit);
     } catch (e) {
         console.log(e)
         throw Error("And Error occured while getting the Restaurants");
