@@ -131,6 +131,13 @@ exports.getUsers = async function (req, res, next){
             _id : mongoose.Types.ObjectId(req.params.tagId)
         }
         var users = await UserService.getUsers(query)
+        if(req.query.limit){
+            var limit = parseInt(req.query.limit)
+            var misRestaurants = users.restaurants.slice(0,limit);
+            var favs = users.favs.slice(0,limit);
+            return res.status(200).json({status: 200, misRestaurants: misRestaurants, favs:favs,
+                 message: "Succesfully retrieved User"})
+        }
         return res.status(200).json({status: 200, data: users, message: "Succesfully retrieved User"})
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
