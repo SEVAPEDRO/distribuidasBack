@@ -85,12 +85,13 @@ exports.getRestaurant = async function (id){
 
 exports.getRestaurants = async function (query,options){
     try {
-        if(!query.name && !query.specialty && !query.stars && !query.price){
+        if(!query.name && !query.specialty && !query.stars && !query.price && !query.kilometers
+            && !query.latitude && !query.longitude){
             return {}
         }
         var Restaurants = Restaurant.find({close:false} ,{
             name:true, specialty:true, stars:true, price:true,
-            images: true, 
+            images: true, location:true
         })
         if(query.name){
             Restaurants= Restaurants.find({name: {$regex: query.name, $options: 'i'}})
@@ -103,6 +104,11 @@ exports.getRestaurants = async function (query,options){
         }
         if(query.price){
             Restaurants= Restaurants.find({price: { $eq:query.price}})
+        }
+        if(query.kilometers && query.latitude && query.longitude){
+            var restaurant = await Restaurants.find({})
+            Restaurants = await this.filterByDistance(restaurant,query)
+            return Restaurants.slice(0,options.limit)
         }
         Restaurants = Restaurants.find({}).limit(options.limit).skip(options.offset)
         return Restaurants;
@@ -139,6 +145,33 @@ exports.getNearByRestaurants = async function (query,options){
             restos.push(restaurantsDistance[i].restaurant)
         }
         return restos.slice(options.offset,options.limit);
+    } catch (e) {
+        console.log(e)
+        throw Error("And Error occured while getting the Restaurants");
+    }
+}
+
+function euclideanDistanceKilometers(latUser, longUser, latResto, longResto) {
+    var distance =Math.pow((latUser-latResto),2) + Math.pow((longUser-longResto),2)
+    distance = Math.sqrt(distance)
+    return distance*111.139
+}
+
+exports.filterByDistance = async function (restaurants,options){
+    try {
+        var restaurantsDistance = []
+        for(let i = 0; i<restaurants.length;i++){
+            var distance = euclideanDistanceKilometers(
+                options.latitude,
+                options.longitude,
+                parseFloat(restaurants[i].location.latitude),
+                parseFloat(restaurants[i].location.longitude)
+            )
+            if(distance<=options.kilometers){
+                restaurantsDistance.push(restaurants[i])
+            }
+        }
+        return restaurantsDistance
     } catch (e) {
         console.log(e)
         throw Error("And Error occured while getting the Restaurants");

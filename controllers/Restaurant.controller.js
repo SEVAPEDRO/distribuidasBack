@@ -53,7 +53,7 @@ exports.getRestaurants = async function (req, res, next){
             var id = mongoose.Types.ObjectId(req.params.tagId)
             var restaurant = await RestaurantService.getRestaurant(id)
             return res.status(200).json({status: 200, data: restaurant, message: "Succesfully retrieved Restaurant"})
-        }else if(req.query.latitude){
+        }else if(req.query.latitude && !req.query.kilometers){
             var options = {
                 offset : req.query.offset ? parseInt(req.query.offset) : 0,
                 limit : req.query.limit ? parseInt(req.query.limit) : 10
@@ -74,6 +74,9 @@ exports.getRestaurants = async function (req, res, next){
                 specialty : req.query.specialty ? req.query.specialty : null,
                 stars: req.query.stars ? parseInt(req.query.stars) : null,
                 price: req.query.price ? parseInt(req.query.price) : null,
+                kilometers: req.query.kilometers ? parseInt(req.query.kilometers) : null,
+                latitude: req.query.latitude ? parseFloat(req.query.latitude) : null,
+                longitude: req.query.longitude ? parseFloat(req.query.longitude) : null
             }
             var restaurants = await RestaurantService.getRestaurants(query,options)
             return res.status(200).json({status: 200, data: restaurants, message: "Succesfully retrieved Restaurants"})
