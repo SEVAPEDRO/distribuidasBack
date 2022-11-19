@@ -52,7 +52,8 @@ exports.updateCategory = async function (req, res, next){
     try {
         var category = {
             id : mongoose.Types.ObjectId(req.params.tagId),
-            title : req.body.title ? req.body.title : null
+            title : req.body.title ? req.body.title : null,
+            restaurant: mongoose.Types.ObjectId(req.body.restaurant) 
         }
         var category = await CategoryService.updateCategory(category)
         return res.status(200).json({status: 200, category, message: "Succesfully updated category"})

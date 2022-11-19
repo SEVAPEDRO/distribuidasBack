@@ -53,12 +53,12 @@ exports.deleteItem = async function (req, res, next){
 
 exports.updateItem = async function (req, res, next){
     try {
-        console.log("body", Boolean(req.body.veggie))
         var item = {
+            category: mongoose.Types.ObjectId(req.body.category),
             id : mongoose.Types.ObjectId(req.params.tagId),
             title : req.body.title ? req.body.title : null,
-            veggie : req.body.veggie ? Boolean(req.body.veggie): null,
-            staac : req.body.staac ? Boolean(req.body.staac) : null,
+            veggie : req.body.veggie ? Boolean(req.body.veggie): false,
+            staac : req.body.staac ? Boolean(req.body.staac) : false,
             image : req.body.image ? req.body.image : null,
             ingredients: req.body.ingredients ? req.body.ingredients : null,
             price: req.body.price ? parseInt(req.body.price) : null

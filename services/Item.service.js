@@ -11,11 +11,43 @@ _this = this
 
 // Async function to get the User List
 
+exports.checkItem = async function (title, category, itemId) {
+    try {
+        var item = await Item.findOne({title: title, category: category})
+        if(!item){
+            return true
+        }else if (item.title === title && item._id.toString() === itemId.toString()){
+            return true
+        }else{
+            return false
+        }
+    } catch (e) {
+        // return a Error message describing the reason 
+        console.log(e)    
+        throw Error("Error while checking Item")
+    }
+    
+}
+
+exports.prepareTitle = function (title) {
+    var words = title.split(" ");
+    for (let i = 0; i < words.length; i++) {
+        words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+    }
+    words = words.join(" ");
+    return words
+}
+
 exports.createItem = async function (item) {
+    var title = this.prepareTitle(item.title)
+    var flag = await this.checkItem(title, item.category, null)
+    if(!flag){
+        throw Error("Item already created")
+    }
     // Creating a new Mongoose Object by using the new keyword
     var newItem = new Item({
         category: item.category,
-        title: item.title,
+        title: title,
         veggie: item.veggie,
         staac: item.staac,
         ingredients: item.ingredients,
@@ -85,6 +117,11 @@ exports.deleteItemInCat= async function (item){
 }
 
 exports.updateItem = async function (item) {
+    var title = this.prepareTitle(item.title)
+    var flag = await this.checkItem(title, item.category, item.id)
+    if(!flag){
+        throw Error("Item already created")
+    }
     var id = {_id :item.id}
     try {
         //Find the old Object by the Id
@@ -98,7 +135,7 @@ exports.updateItem = async function (item) {
     }
     //Edit the Object
     if(item.title){
-        oldItem.title = item.title
+        oldItem.title = title
     }
     if(item.veggie || !item.veggie){
         oldItem.veggie = item.veggie

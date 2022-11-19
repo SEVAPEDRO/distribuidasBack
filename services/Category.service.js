@@ -11,10 +11,40 @@ _this = this
 
 // Async function to get the User List
 
+exports.checkCategory = async function (category, restaurant) {
+    try {
+        var cat = await Category.findOne({title: category, restaurant: restaurant})
+        if(cat){
+            return false
+        }else{
+            return true
+        }
+    } catch (e) {
+        // return a Error message describing the reason 
+        console.log(e)    
+        throw Error("Error while checking Category")
+    }
+    
+}
+
+exports.prepareTitle = function (title) {
+    var words = title.split(" ");
+    for (let i = 0; i < words.length; i++) {
+        words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+    }
+    words = words.join(" ");
+    return words
+}
+
 exports.createCategory = async function (category) {
+    var title = this.prepareTitle(category.title)
+    var flag = await this.checkCategory(title, category.restaurant)
+    if(!flag){
+        throw Error("Category already created")
+    }
     var newCat = new Category({
         restaurant: category.restaurant,
-        title: category.title
+        title: title
     })
     try {
         // Saving the Category 
@@ -78,6 +108,11 @@ exports.deleteCatInResto= async function (category){
 }
 
 exports.updateCategory = async function (category) {
+    var title = this.prepareTitle(category.title)
+    var flag = await this.checkCategory(title, category.restaurant)
+    if(!flag){
+        throw Error("Category already created")
+    }
     var id = {_id :category.id}
     try {
         //Find the old Object by the Id
@@ -91,7 +126,7 @@ exports.updateCategory = async function (category) {
     }
     //Edit the Object
     if(category.title){
-        oldCategory.title = category.title
+        oldCategory.title = title
     }
     try {
         var savedCategory = await oldCategory.save()
