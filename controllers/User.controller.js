@@ -69,6 +69,7 @@ exports.createUser = async function (req, res, next) {
 
 
 exports.updateUser = async function (req, res, next) {
+    var token = res.locals.token ? res.locals.token : ""
     if (!req.params.tagId) {
         return res.status(400).json({status: 400., message: "add Id to update user"})
     }
@@ -81,7 +82,7 @@ exports.updateUser = async function (req, res, next) {
         }
         try {
             var updatedUser = await UserService.updateUser(User)
-            return res.status(200).json({status: 200, data: updatedUser, message: "Succesfully Updated User"})
+            return res.status(200).json({status: 200, data: updatedUser,token:token, message: "Succesfully Updated User"})
         } catch (e) {
             return res.status(400).json({status: 400, message: e.message})
         }
@@ -99,7 +100,7 @@ exports.updateUser = async function (req, res, next) {
             if(updatedUser===401){
                 return res.status(401).json({status: 401, message: "The provided password is not the current password"})
             }
-            return res.status(200).json({status: 200, data: updatedUser, message: "Succesfully Updated User"})
+            return res.status(200).json({status: 200, data: updatedUser,token:token, message: "Succesfully Updated User"})
         } catch (e) {
             return res.status(400).json({status: 400, message: e.message})
         }
@@ -135,10 +136,12 @@ exports.getUsers = async function (req, res, next){
             var limit = parseInt(req.query.limit)
             var misRestaurants = users.restaurants.slice(0,limit);
             var favs = users.favs.slice(0,limit);
-            return res.status(200).json({status: 200, misRestaurants: misRestaurants, favs:favs,
+            var token = res.locals.token ? res.locals.token : ""
+            return res.status(200).json({status: 200, misRestaurants: misRestaurants, favs:favs, token:token,
                  message: "Succesfully retrieved User"})
         }
-        return res.status(200).json({status: 200, data: users, message: "Succesfully retrieved User"})
+        var token = res.locals.token ? res.locals.token : ""
+        return res.status(200).json({status: 200, data: users, token:token, message: "Succesfully retrieved User"})
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -146,10 +149,11 @@ exports.getUsers = async function (req, res, next){
 
 exports.deleteUser = async function (req, res, next){
     var id = mongoose.Types.ObjectId(req.params.tagId)
+    var token = res.locals.token ? res.locals.token : ""
     try {
         var deleted = await UserService.deleteUser(id);
         var deletion = await DeletionService.deleteManyRestaurants(deleted.restaurants)
-        res.status(200).json({status: 200, message: "Succesfully Deleted"});
+        res.status(200).json({status: 200, token:token, message: "Succesfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -158,22 +162,22 @@ exports.deleteUser = async function (req, res, next){
 exports.handleFav = async function (req, res, next){
     var id = mongoose.Types.ObjectId(req.params.tagId)
     var idr = mongoose.Types.ObjectId(req.body.idRestaurant)
-    
+    var token = res.locals.token ? res.locals.token : ""
     if(req.body.option == "0"){
         try {
             // Calling the Service function with the new object from the Request Body
             var userUpdate = await UserService.addFav(id,idr)
-            return res.status(200).json({userUpdate, message: "Fav was succesfully added"})
+            return res.status(200).json({userUpdate, token:token, message: "Fav was succesfully added"})
         } catch (e) {
             //Return an Error Response Message with Code and the Error Message.
             console.log(e)
-            return res.status(400).json({status: 400, message: "Fav addition was Unsuccesfull"})
+            return res.status(400).json({status: 400,  message: "Fav addition was Unsuccesfull"})
         }
     }else if(req.body.option == "1"){
         try {
             // Calling the Service function with the new object from the Request Body
             var userUpdate = await UserService.removeFav(id,idr)
-            return res.status(200).json({userUpdate, message: "Fav was succesfully removed"})
+            return res.status(200).json({userUpdate, token:token, message: "Fav was succesfully removed"})
         } catch (e) {
             //Return an Error Response Message with Code and the Error Message.
             console.log(e)

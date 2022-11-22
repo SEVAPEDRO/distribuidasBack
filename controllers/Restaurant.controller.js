@@ -8,6 +8,7 @@ _this = this;
 // Async Controller function to get the To do List
 
 exports.createRestaurant = async function (req, res, next) {
+    var token = res.locals.token ? res.locals.token : ""
     // Req.Body contains the form submit values.
     console.log("llegue al controller",req.body)
     var Resto = {
@@ -39,7 +40,7 @@ exports.createRestaurant = async function (req, res, next) {
         // Calling the Service function with the new object from the Request Body
         var createdResto = await RestaurantService.createRestaurant(Resto)
         var upUser = await RestaurantService.addRestoInOwner(createdResto)
-        return res.status(201).json({createdResto, message: "Succesfully Created Restaurant"})
+        return res.status(201).json({createdResto, token:token, message: "Succesfully Created Restaurant"})
     } catch (e) {
         //Return an Error Response Message with Code and the Error Message.
         console.log(e)
@@ -49,10 +50,11 @@ exports.createRestaurant = async function (req, res, next) {
 
 exports.getRestaurants = async function (req, res, next){
     try {
+        var token = res.locals.token ? res.locals.token : ""
         if(req.params.tagId){
             var id = mongoose.Types.ObjectId(req.params.tagId)
             var restaurant = await RestaurantService.getRestaurant(id)
-            return res.status(200).json({status: 200, data: restaurant, message: "Succesfully retrieved Restaurant"})
+            return res.status(200).json({status: 200, data: restaurant, token:token, message: "Succesfully retrieved Restaurant"})
         }else if(req.query.latitude && !req.query.kilometers){
             var options = {
                 offset : req.query.offset ? parseInt(req.query.offset) : 0,
@@ -63,7 +65,7 @@ exports.getRestaurants = async function (req, res, next){
                 longitude: parseFloat(req.query.longitude)
             }
             var restaurants = await RestaurantService.getNearByRestaurants(userLocation,options)
-            return res.status(200).json({status: 200, data: restaurants, message: "Succesfully retrieved Restaurants"})
+            return res.status(200).json({status: 200, data: restaurants, token:token, message: "Succesfully retrieved Restaurants"})
         }else{
             var options = {
                 offset : req.query.offset ? parseInt(req.query.offset) : 0,
@@ -79,7 +81,7 @@ exports.getRestaurants = async function (req, res, next){
                 longitude: req.query.longitude ? parseFloat(req.query.longitude) : null
             }
             var restaurants = await RestaurantService.getRestaurants(query,options)
-            return res.status(200).json({status: 200, data: restaurants, message: "Succesfully retrieved Restaurants"})
+            return res.status(200).json({status: 200, data: restaurants,token:token, message: "Succesfully retrieved Restaurants"})
         }
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
@@ -88,12 +90,13 @@ exports.getRestaurants = async function (req, res, next){
 
 exports.deleteRestaurant = async function (req, res, next){
     var id = mongoose.Types.ObjectId(req.params.tagId)
+    var token = res.locals.token ? res.locals.token : ""
     try {
         var deleted = await RestaurantService.deleteRestaurant(id);
         var deleted2 = await RestaurantService.deleteRestoInAllFavs(id)
         var upUser = await RestaurantService.deleteRestoInOwner(deleted)
         var deletion = await DeletionService.deleteManyCategories(deleted.menu)
-        res.status(200).json({status: 200, message: "Succesfully Deleted"});
+        res.status(200).json({status: 200, token:token, message: "Succesfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -102,6 +105,7 @@ exports.deleteRestaurant = async function (req, res, next){
 exports.postComment = async function (req, res, next){
     var id = mongoose.Types.ObjectId(req.params.tagId)
     var date = new Date()
+    var token = res.locals.token ? res.locals.token : ""
     date.setHours(date.getHours() - 3);
     var comment = {
         comment : req.body.comment,
@@ -111,7 +115,7 @@ exports.postComment = async function (req, res, next){
     }
     try {
         var restaurant = await RestaurantService.postComment(id,comment);
-        res.status(201).json({status: 201,data: restaurant, message: "Succesfully added comment"});
+        res.status(201).json({status: 201,data: restaurant, token:token, message: "Succesfully added comment"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -119,6 +123,7 @@ exports.postComment = async function (req, res, next){
 
 exports.updateRestaurant = async function (req, res, next){
     try {
+        var token = res.locals.token ? res.locals.token : ""
         var restaurant = {
             id : mongoose.Types.ObjectId(req.params.tagId),
             name: req.body.name ? req.body.name: null,
@@ -163,7 +168,7 @@ exports.updateRestaurant = async function (req, res, next){
             images: req.body.images ? req.body.images: null,
         }
         var restaurant = await RestaurantService.updateRestaurant(restaurant)
-        return res.status(200).json({status: 200, data: restaurant, message: "Succesfully updated restaurant"})
+        return res.status(200).json({status: 200, data: restaurant, token:token, message: "Succesfully updated restaurant"})
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }

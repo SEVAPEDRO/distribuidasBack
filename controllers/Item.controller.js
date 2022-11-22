@@ -7,6 +7,7 @@ _this = this;
 // Async Controller function to get the To do List
 
 exports.createItem = async function (req, res, next) {
+    var token = res.locals.token ? res.locals.token : ""
     // Req.Body contains the form submit values.
     console.log("llegue al controller",req.body)
     var Item = {
@@ -22,7 +23,7 @@ exports.createItem = async function (req, res, next) {
         // Calling the Service function with the new object from the Request Body
         var createdItem = await ItemService.createItem(Item)
         var upCategory = await ItemService.addItemInCat(createdItem)
-        return res.status(201).json({createdItem, message: "Succesfully Created Item"})
+        return res.status(201).json({createdItem,token:token, message: "Succesfully Created Item"})
     } catch (e) {
         //Return an Error Response Message with Code and the Error Message.
         console.log(e)
@@ -31,21 +32,23 @@ exports.createItem = async function (req, res, next) {
 }
 
 exports.getItem = async function (req, res, next){
+    var token = res.locals.token ? res.locals.token : ""
     try {
         var id = mongoose.Types.ObjectId(req.params.tagId)
         var items = await ItemService.getItem(id)
-        return res.status(200).json({status: 200, data: items, message: "Succesfully retrieved item"})
+        return res.status(200).json({status: 200, data: items,token:token, message: "Succesfully retrieved item"})
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
 }
 
 exports.deleteItem = async function (req, res, next){
+    var token = res.locals.token ? res.locals.token : ""
     var id = mongoose.Types.ObjectId(req.params.tagId)
     try {
         var deleted = await ItemService.deleteItem(id)
         var upCat = await ItemService.deleteItemInCat(deleted)
-        res.status(200).json({status: 200, message: "Succesfully Deleted"});
+        res.status(200).json({status: 200,token:token, message: "Succesfully Deleted"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }
@@ -53,6 +56,7 @@ exports.deleteItem = async function (req, res, next){
 
 exports.updateItem = async function (req, res, next){
     try {
+        var token = res.locals.token ? res.locals.token : ""
         var item = {
             category: mongoose.Types.ObjectId(req.body.category),
             id : mongoose.Types.ObjectId(req.params.tagId),
@@ -64,7 +68,7 @@ exports.updateItem = async function (req, res, next){
             price: req.body.price ? parseInt(req.body.price) : null
         }
         var items = await ItemService.updateItem(item)
-        return res.status(200).json({status: 200, data: items, message: "Succesfully updated item"})
+        return res.status(200).json({status: 200, data: items,token:token, message: "Succesfully updated item"})
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
     }

@@ -1,4 +1,5 @@
 var jwt = require('jsonwebtoken');
+const Refresh = require('./Refresh');
 var config = require('../config').config();
 
 var authorization = function (req, res, next) {
@@ -11,12 +12,21 @@ var authorization = function (req, res, next) {
 
     let sec = process.env.SECRET;
     //console.log("secret",sec)
-    jwt.verify(token, sec, function (err, decoded) {
+    jwt.verify(token, sec, async function (err, decoded) {
         var msg = {auth: false, message: 'Failed to authenticate token.'};
-        if (err)
-        res.status(500).send(msg);
-        req.userId = decoded.id;
-        next();
+        if (err){
+            console.log("error1")
+            var response = await Refresh(req, res, next)
+            console.log("response",response)
+            if(response.auth){
+                next();
+            }else{
+                console.log("error2")
+                res.status(500).send(msg);
+            }
+        }else{
+            next();
+        }
     });
 }
 

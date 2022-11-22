@@ -86,6 +86,7 @@ exports.uploadFilesImgUser = async function (req, res, next) {
 		}
 		
 		var imgObject = await UserImgService.guardarImagenUser(myUploadedFiles[0])
-		res.json({ok: true, msg: 'Files uploaded succesfully!', imgObject})
+		var token = res.locals.token ? res.locals.token : ""
+		res.json({ok: true, msg: 'Files uploaded succesfully!', imgObject,token:token})
 	})
 }

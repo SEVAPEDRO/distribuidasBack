@@ -1,5 +1,6 @@
 // Gettign the Newly created Mongoose Model we just created 
 var User = require('../models/User.model');
+var Token = require('../models/Token.model');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
@@ -26,8 +27,19 @@ exports.loginUser = async function (user) {
         var token = jwt.sign({
             id: _details._id
         }, process.env.SECRET, {
-            expiresIn: 86400 // expires in 24 hours
+            expiresIn: '10m' // expires in 10 minutes
         });
+        var refreshToken = jwt.sign({
+            id: _details._id,
+            email: _details.email
+        }, process.env.SECRET, {
+            expiresIn: '1d' // expires in 24 hours
+        });
+        var newToken = new Token({
+            token: token,
+            refreshToken: refreshToken
+        })
+        await newToken.save()
         return {token:token, user:_details};
     } catch (e) {
         // return a Error message describing the reason     
@@ -49,8 +61,19 @@ exports.loginGoogle = async function (user) {
         var token = jwt.sign({
             id: _details._id
         }, process.env.SECRET, {
-            expiresIn: 86400 // expires in 24 hours
+            expiresIn: '10m' // expires in 10 minutes
         });
+        var refreshToken = jwt.sign({
+            id: _details._id,
+            email: _details.email
+        }, process.env.SECRET, {
+            expiresIn: '1d' // expires in 24 hours
+        });
+        var newToken = new Token({
+            token: token,
+            refreshToken: refreshToken
+        })
+        await newToken.save()
         return {token, id:_details._id};
     } catch (e) {
         // return a Error message describing the reason     
@@ -78,12 +101,28 @@ exports.createUser = async function (user) {
         try {
             // Saving the User 
             var savedUser = await newUser.save();
-            var token = jwt.sign({
-                id: savedUser._id
-            }, process.env.SECRET, {
-                expiresIn: 86400 // expires in 24 hours
-            });
-            return {token,id:savedUser._id};
+            if(user.owner){
+                var token = "token"
+                return {token,id:savedUser._id};
+            }else{
+                var token = jwt.sign({
+                    id: savedUser._id
+                }, process.env.SECRET, {
+                    expiresIn: '10m' // expires in 24 hours
+                });
+                var refreshToken = jwt.sign({
+                    id: savedUser._id,
+                    email: savedUser.email
+                }, process.env.SECRET, {
+                    expiresIn: '1d' // expires in 24 hours
+                });
+                var newToken = new Token({
+                    token: token,
+                    refreshToken: refreshToken
+                })
+                await newToken.save()
+                return {token,id:savedUser._id};
+            }
         } catch (e) {
             // return a Error message describing the reason 
             console.log(e)    
