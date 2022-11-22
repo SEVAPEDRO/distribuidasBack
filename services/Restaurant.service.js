@@ -219,7 +219,7 @@ exports.deleteRestoInAllFavs= async function (id){
     }
 }
 
-exports.postComment = async function (id,comment) {
+exports.postComment = async function (id,comment,author) {
     try {
         var oldResto = await Restaurant.findOne({
             _id: id
@@ -229,7 +229,10 @@ exports.postComment = async function (id,comment) {
         oldResto.cantRatings += 1
         oldResto.stars = (oldResto.totalRatings/oldResto.cantRatings).toFixed(1)
         resto = await oldResto.save()
-        return resto;
+        var user = await User.findOne({_id:author},{
+            name:true, lastName:true, picture:true
+        })
+        return {resto,user};
     } catch (e) {
         throw Error("Error Occured while creating comment")
     }

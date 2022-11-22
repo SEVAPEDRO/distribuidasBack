@@ -107,14 +107,15 @@ exports.postComment = async function (req, res, next){
     var date = new Date()
     var token = res.locals.token ? res.locals.token : ""
     date.setHours(date.getHours() - 3);
+    var author = mongoose.Types.ObjectId(req.body.author)
     var comment = {
         comment : req.body.comment,
         point: req.body.point,
-        author: mongoose.Types.ObjectId(req.body.author),
+        author: author,
         date: date
     }
     try {
-        var restaurant = await RestaurantService.postComment(id,comment);
+        var restaurant = await RestaurantService.postComment(id,comment,author);
         res.status(201).json({status: 201,data: restaurant, token:token, message: "Succesfully added comment"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
