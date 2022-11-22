@@ -219,7 +219,7 @@ exports.deleteRestoInAllFavs= async function (id){
     }
 }
 
-exports.postComment = async function (id,comment,author) {
+exports.postComment = async function (id,comment) {
     try {
         var oldResto = await Restaurant.findOne({
             _id: id
@@ -229,10 +229,11 @@ exports.postComment = async function (id,comment,author) {
         oldResto.cantRatings += 1
         oldResto.stars = (oldResto.totalRatings/oldResto.cantRatings).toFixed(1)
         resto = await oldResto.save()
-        var user = await User.findOne({_id:author},{
-            name:true, lastName:true, picture:true
-        })
-        return {resto,user};
+        var restaurant = await Restaurant.findOne({_id:id}).populate([
+            {path:"comments.author", model: "User"},
+            {path:"menu", model: "Category"},
+        ])
+        return restaurant;
     } catch (e) {
         throw Error("Error Occured while creating comment")
     }

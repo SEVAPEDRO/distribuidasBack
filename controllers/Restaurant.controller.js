@@ -115,7 +115,7 @@ exports.postComment = async function (req, res, next){
         date: date
     }
     try {
-        var restaurant = await RestaurantService.postComment(id,comment,author);
+        var restaurant = await RestaurantService.postComment(id,comment);
         res.status(201).json({status: 201,data: restaurant, token:token, message: "Succesfully added comment"});
     } catch (e) {
         return res.status(400).json({status: 400, message: e.message})
