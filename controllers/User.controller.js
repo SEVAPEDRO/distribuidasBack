@@ -52,6 +52,9 @@ exports.createUser = async function (req, res, next) {
                 return res.status(409).json({message: "User has already been created"})
             }
         }else{
+            if(!req.body.email){
+                return res.status(400).json({message: "Error please try again"})
+            }
             var createdUser = await UserService.createUser(User)
             if(createdUser){
                 return res.status(201).json({createdUser, message: "Succesfully Created User"})
