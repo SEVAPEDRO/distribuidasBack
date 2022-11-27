@@ -108,7 +108,7 @@ exports.createUser = async function (user) {
                 var token = jwt.sign({
                     id: savedUser._id
                 }, process.env.SECRET, {
-                    expiresIn: '10m' // expires in 24 hours
+                    expiresIn: '10m' // expires in 10 minutes
                 });
                 var refreshToken = jwt.sign({
                     id: savedUser._id,

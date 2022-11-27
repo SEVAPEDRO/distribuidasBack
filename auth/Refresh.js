@@ -20,18 +20,24 @@ var Refresh = async function (req, res, next) {
                     else {
                         // Correct token we send a new access token
                         var newToken = jwt.sign({
-                            token: dbToken.refreshToken
+                            token: dbToken.refreshToken.slice(-60)
                         }, process.env.SECRET, {
                             expiresIn: '10m' // expires in 10 minutes
                         });
+                        var newRefreshToken = jwt.sign({
+                            token: dbToken.refreshToken.slice(-60)
+                        }, process.env.SECRET, {
+                            expiresIn: '1d' // expires in 24 hours
+                        });
                         res.locals.token = newToken
-                        
+                        res.locals.newRefreshToken = newRefreshToken
                     }
                 })
                 if(!res.locals.token){
                     return {auth: false, message: 'Failed to authenticate token.'};
                 }
                 dbToken.token =  res.locals.token
+                dbToken.refreshToken = res.locals.newRefreshToken
                 var saves = await dbToken.save()
                 return {auth:true}
             }else{
