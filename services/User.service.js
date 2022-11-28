@@ -91,7 +91,8 @@ exports.createUser = async function (user) {
         lastName: user.lastName,
         email: user.email,
         password: hashedPassword,
-        owner: user.owner
+        owner: user.owner,
+        picture: user.picture
     })
     var filter = {
         email: user.email
